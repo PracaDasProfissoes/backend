@@ -12,6 +12,7 @@ import br.edu.opi.praca.school.model.Grade;
 import br.edu.opi.praca.school.model.School;
 import br.edu.opi.praca.school.service.SchoolService;
 import br.edu.opi.praca.excel_io.exceptions.*;
+import com.sun.xml.internal.ws.api.message.ExceptionHasMessage;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -95,7 +96,13 @@ public class ExcelParserService {
 				StudentTableRow tempStudent = new StudentTableRow();
 				if (isCellsWithContent(row, TargetXlsx.STUDENT)) {
 					tempStudent.setName(getNameAttribute(row.getCell(0)));
-					tempStudent.setGenre(getGenreAttribute(row.getCell(2)));
+					tempStudent.setGenre(getGenreAttribute(row.getCell(1)));
+					tempStudent.setAge(getAgeAttribute(row.getCell(2)).intValue());
+					tempStudent.setRg(getRGAttribute(row.getCell(3)));
+					tempStudent.setCpf(getCpfAttribute(row.getCell(4)));
+					tempStudent.setGrade(getGradeAttribute(row.getCell(5)));
+					tempStudent.setTurno(getTurnoAttribute(row.getCell(6)));
+					tempStudent.setCourse(getCourseAttribute(row.getCell(7)));
 					tempStudent.setStudentTableMetadata(savedCompetitorTableMetadata);
 					savedCompetitorTableMetadata.addRow(tempStudent);
 				}
@@ -107,6 +114,7 @@ public class ExcelParserService {
 			throw new InvalidFileRuntimeException();
 		}
 	}
+
 
 //	@Transactional
 //	void createCompetitorsTransactional(Long schoolId, int year, InputStream excelFileInputStream) {
@@ -192,6 +200,60 @@ public class ExcelParserService {
 		} catch (Exception e) {
 			throw new InvalidGradeRuntimeException(cell.getColumnIndex(), cell.getRow().getRowNum() + 1, cell.toString());
 		}
+	}
+
+	private static Double getAgeAttribute(XSSFCell cell) {
+		try {
+			if (cell.toString().isEmpty()){
+				throw  new AgeNotNullRuntimeException(cell.getColumnIndex(), cell.getRow().getRowNum() + 1);
+			}
+			if (cell.getCellType() == CellType.NUMERIC){
+				return cell.getNumericCellValue();
+			} else {
+				throw new RuntimeException();
+			}
+		} catch (AgeNotNullRuntimeException nnre){
+			throw nnre;
+		} catch (Exception e) {
+			throw new InvalidAgeRuntimeException(cell.getColumnIndex(), cell.getRow().getRowNum() + 1, cell.toString());
+		}
+	}
+
+	private static String getRGAttribute(XSSFCell cell) {
+		try {
+			String string = cell.getStringCellValue();
+			if (string.isEmpty()) {
+				throw new RGNotNullRuntimeException(cell.getColumnIndex(), cell.getRow().getRowNum() + 1);
+			}
+			return string;
+		} catch (RGNotNullRuntimeException nnnre) {
+			throw nnnre;
+		} catch (Exception e) {
+			throw new InvalidRGRuntimeException(cell.getColumnIndex(), cell.getRow().getRowNum() + 1, cell.toString());
+		}
+	}
+
+	private String getCpfAttribute(XSSFCell cell) {
+		try {
+			String string = cell.getStringCellValue();
+			if (string.isEmpty()) {
+				throw new CpfNotNullRuntimeException(cell.getColumnIndex(), cell.getRow().getRowNum() + 1);
+			}
+			return string;
+		} catch (CpfNotNullRuntimeException nnnre) {
+			throw nnnre;
+		} catch (Exception e) {
+			throw new InvalidCpfRuntimeException(cell.getColumnIndex(), cell.getRow().getRowNum() + 1, cell.toString());
+		}
+	}
+
+	private static String getTurnoAttribute(XSSFCell cell) {
+		String string = cell.getStringCellValue();
+		return string;
+	}
+
+	private static String getCourseAttribute(XSSFCell cell) {
+		return cell.getStringCellValue();
 	}
 
 	private static Double getScoreAttibute(XSSFCell cell) {

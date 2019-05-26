@@ -29,10 +29,10 @@ public class StudentTableRow extends Auditing implements Serializable, Model<Lon
 	private Integer age;
 
 	@Column(name = "RG")
-	private Integer rg;
+	private String rg;
 
 	@Column(name = "cpf")
-	private Integer cpf;
+	private String cpf;
 
 	@Column(name = "grade")
 	private Grade grade;
@@ -84,19 +84,19 @@ public class StudentTableRow extends Auditing implements Serializable, Model<Lon
 		this.age = age;
 	}
 
-	public Integer getRg() {
+	public String getRg() {
 		return rg;
 	}
 
-	public void setRg(Integer rg) {
+	public void setRg(String rg) {
 		this.rg = rg;
 	}
 
-	public Integer getCpf() {
+	public String getCpf() {
 		return cpf;
 	}
 
-	public void setCpf(Integer cpf) {
+	public void setCpf(String cpf) {
 		this.cpf = cpf;
 	}
 
