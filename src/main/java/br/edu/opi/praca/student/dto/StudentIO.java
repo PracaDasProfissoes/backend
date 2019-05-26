@@ -1,0 +1,89 @@
+package br.edu.opi.praca.student.dto;
+
+import br.edu.opi.praca.person.models.Person;
+import br.edu.opi.praca.school.model.Grade;
+import br.edu.opi.praca.school.model.School;
+import br.edu.opi.praca.student.model.Student;
+import org.modelmapper.Converter;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+import org.modelmapper.spi.MappingContext;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.stereotype.Component;
+
+import java.lang.reflect.Type;
+import java.util.List;
+
+/**
+ * Mapper to User.
+ */
+@Component("studentIO")
+public class StudentIO {
+
+	private ModelMapper modelMapper;
+
+	final Converter<StudentInput, Student> studentInputConverter = new Converter<StudentInput, Student>() {
+		@Override
+		public Student convert(MappingContext<StudentInput, Student> context) {
+			StudentInput input = context.getSource();
+			return new Student(
+					new Person(input.getName(), input.getGenre()),
+					new School(input.getSchoolId()),
+					input.getCourse(),input.getAge(), Grade.from(input.getGrade()));
+		}
+	};
+
+	final Converter<Student, StudentOutput> studentOutputConverter = new Converter<Student, StudentOutput>() {
+		@Override
+		public StudentOutput convert(MappingContext<Student, StudentOutput> context) {
+			Student input = context.getSource();
+			return toStudentOutput(input);
+		}
+	};
+
+	public StudentIO() {
+		this.modelMapper = new ModelMapper();
+		this.modelMapper.addConverter(studentInputConverter);
+		this.modelMapper.addConverter(studentOutputConverter);
+	}
+
+	public Student mapTo(StudentInput studentInput) {
+		return this.modelMapper.map(studentInput, Student.class);
+	}
+
+	public StudentOutput mapTo(Student student) {
+		return this.modelMapper.map(student, StudentOutput.class);
+	}
+
+	public List<StudentOutput> toList(List<Student> source) {
+		Type dest = new TypeToken<List<StudentOutput>>() {
+		}.getType();
+		return modelMapper.map(source, dest);
+	}
+
+	public List<Student> toStudentList(List<StudentInput> source) {
+		Type dest = new TypeToken<List<Student>>() {
+		}.getType();
+		return modelMapper.map(source, dest);
+	}
+
+	public Page<StudentOutput> toPage(Page<Student> source) {
+		List<StudentOutput> list = toList(source.getContent());
+		return new PageImpl<>(list, source.getPageable(), source.getTotalElements());
+	}
+
+	private StudentOutput toStudentOutput(Student student) {
+		StudentOutput studentOutput = new StudentOutput();
+		studentOutput.setId(student.getId());
+		if (student.getPerson() != null) {
+			Person person = student.getPerson();
+			studentOutput.setName(person.getFullName());
+		}
+
+		studentOutput.setGenre(student.getPerson().getGenre().getKey());
+
+		return studentOutput;
+	}
+
+}
